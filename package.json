@@ -1,0 +1,9 @@
+{
+  "name": "relay-screen-sharing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A browser-to-browser WebRTC screen sharing app",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

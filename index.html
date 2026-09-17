@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#180c16">
+  <title>Relay | Share your screen, clearly</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Relay home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>relay</span>
+      </a>
+      <div class="topbar-meta">
+        <span class="secure-dot"></span>
+        <span>peer-to-peer session</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="eyebrow"><span class="eyebrow-line"></span> A quiet space for your screen</div>
+        <h1>Show the work.<br><em>Keep the focus.</em></h1>
+        <p class="hero-copy">Share a browser tab in real time, directly between two windows. No uploads, no accounts, no noise.</p>
+        <div class="session-bar" aria-label="Session controls">
+          <label for="room-code">Room code</label>
+          <input id="room-code" placeholder="RELAY-XXXX" maxlength="24" spellcheck="false" autocomplete="off">
+          <button class="room-button" id="join-room" type="button">Join room</button>
+          <span class="session-hint">Use the same code in both tabs, or change it to switch rooms</span>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Screen sharing controls">
+        <article class="control-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">01 / You</span>
+              <h2>Share your media</h2>
+            </div>
+            <span class="status-pill" id="sender-status"><span class="status-dot"></span><span class="status-label">Ready</span></span>
+          </div>
+          <p>Choose a screen or camera to share. You can add computer audio and your microphone.</p>
+          <div class="media-options" aria-label="Optional audio sources">
+            <label><input id="share-camera" type="checkbox"> Camera</label>
+            <label><input id="share-system-audio" type="checkbox"> Computer audio</label>
+            <label><input id="share-microphone" type="checkbox"> Microphone</label>
+          </div>
+          <video class="local-preview" id="local-preview" autoplay muted playsinline hidden></video>
+          <button class="primary-button" id="start-share" type="button">
+            <span class="button-icon" aria-hidden="true">↗</span>
+            Start sharing
+          </button>
+          <button class="text-button" id="stop-share" type="button" disabled>Stop sharing</button>
+        </article>
+
+        <div class="connector" aria-hidden="true"><span></span><b>01</b><span></span></div>
+
+        <article class="control-panel viewer-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">02 / Peer</span>
+              <h2>Connect to a peer</h2>
+            </div>
+            <span class="status-pill" id="viewer-status"><span class="status-dot"></span><span class="status-label">Waiting</span></span>
+          </div>
+          <p>Join the room to receive their screen and audio. Sharing back is optional and can be started whenever you are ready.</p>
+          <button class="secondary-button" id="connect-viewer" type="button">
+            <span class="button-icon" aria-hidden="true">◉</span>
+            Connect to share
+          </button>
+          <button class="text-button" id="disconnect-viewer" type="button" disabled>Disconnect</button>
+        </article>
+      </section>
+
+      <section class="stage-wrap" aria-label="Live screen preview">
+        <div class="stage-header">
+          <div class="stage-title"><span class="live-indicator" id="live-indicator"></span><strong>Live canvas</strong><span id="stage-caption">No active stream</span></div>
+          <div class="stage-actions">
+            <div class="stats" id="stream-stats">-- × -- <span>/</span> -- fps</div>
+            <button class="pip-button" id="toggle-pip" type="button" disabled title="Pop the shared screen into a floating window">
+              <span class="button-icon" aria-hidden="true">↗</span>
+              Picture in picture
+            </button>
+          </div>
+        </div>
+        <div class="video-stage" id="video-stage">
+          <video id="remote-video" autoplay playsinline></video>
+          <div class="empty-stage" id="empty-stage">
+            <div class="empty-icon" aria-hidden="true">⌁</div>
+            <strong>Your peer's screen will appear here</strong>
+            <span>Join the room to begin viewing</span>
+          </div>
+          <div class="stage-corner top-left"></div><div class="stage-corner top-right"></div><div class="stage-corner bottom-left"></div><div class="stage-corner bottom-right"></div>
+        </div>
+      </section>
+
+      <footer class="footer"><span>Built on WebRTC</span><span class="footer-dot"></span><span>Nothing leaves your browser</span><span class="footer-right">Relay v1.0</span></footer>
+    </main>
+  </div>
+  <div class="cookie-banner" id="cookie-banner" role="dialog" aria-label="Cookie consent">
+    <div>
+      <strong>One small preference</strong>
+      <p>Relay uses a local preference to remember your cookie choice. No tracking cookies, no analytics.</p>
+    </div>
+    <div class="consent-actions">
+      <button class="text-button" id="cookie-later" type="button">Not now</button>
+      <button class="consent-button" id="accept-cookies" type="button">Accept cookies</button>
+    </div>
+  </div>
+  <dialog class="consent-dialog" id="share-dialog" aria-labelledby="share-dialog-title">
+    <span class="dialog-kicker">Screen sharing</span>
+    <h2 id="share-dialog-title">Ready to share your screen?</h2>
+    <p>Choose a tab, window, display, or camera in the next browser prompt. Your optional audio choices will be requested there too.</p>
+    <div class="consent-actions">
+      <button class="text-button" id="cancel-share" type="button">Not now</button>
+      <button class="primary-button" id="confirm-share" type="button">Allow screen sharing</button>
+    </div>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>
