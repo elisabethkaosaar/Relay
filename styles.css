@@ -36,15 +36,6 @@ h1 { margin: 25px 0 19px; font-size: clamp(48px, 6vw, 78px); line-height: .98; l
 .media-options { display: flex; flex-wrap: wrap; gap: 10px 16px; margin: -3px 0 18px; color: var(--muted); font: 11px 'DM Mono', monospace; }
 .media-options label { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; }
 .media-options input { width: 13px; height: 13px; margin: 0; accent-color: var(--teal); }
-.media-toggle { position: relative; min-height: 30px; padding: 5px 8px 5px 6px; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; background: rgba(245,138,187,.04); font: 11px 'DM Mono', monospace; }
-.media-toggle:hover { border-color: rgba(245,138,187,.38); color: var(--ink); }
-.media-toggle input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.media-toggle.is-on { color: var(--teal); border-color: rgba(245,138,187,.42); background: rgba(245,138,187,.12); }
-.media-icon { display: inline-grid; width: 21px; height: 21px; place-items: center; }
-.media-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
-.media-icon .icon-slash { display: block; }
-.media-toggle.is-on .icon-slash { display: none; }
-.media-option { color: var(--muted); }
 .local-preview { display: block; width: 100%; max-height: 125px; margin: -4px 0 18px; border: 1px solid rgba(245,138,187,.22); border-radius: 5px; background: #100810; object-fit: cover; }
 .local-preview[hidden] { display: none; }
 .panel-heading { display: flex; justify-content: space-between; align-items: flex-start; } .panel-heading h2 { margin: 10px 0 0; font-size: 21px; letter-spacing: -.04em; } .control-panel p { min-height: 48px; margin: 17px 0 18px; color: var(--muted); font-size: 12px; line-height: 1.65; }
