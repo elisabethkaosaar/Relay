@@ -47,9 +47,17 @@
           </div>
           <p>Choose a screen or camera to share. You can add computer audio and your microphone.</p>
           <div class="media-options" aria-label="Optional audio sources">
-            <label><input id="share-camera" type="checkbox"> Camera</label>
-            <label><input id="share-system-audio" type="checkbox"> Computer audio</label>
-            <label><input id="share-microphone" type="checkbox"> Microphone</label>
+            <label class="media-toggle" title="Toggle camera">
+              <input id="share-camera" type="checkbox">
+              <span class="media-icon camera-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7.5h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Zm12 3 5-3v9l-5-3v-3Z"/><path class="icon-slash" d="m3 3 18 18"/></svg></span>
+              <span class="media-label">Camera</span>
+            </label>
+            <label class="media-toggle" title="Toggle microphone">
+              <input id="share-microphone" type="checkbox">
+              <span class="media-icon microphone-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5a4 4 0 0 1 8 0v6a4 4 0 0 1-8 0V5Zm-3 6a7 7 0 0 0 14 0m-7 7v4m-4 0h8"/><path class="icon-slash" d="m3 3 18 18"/></svg></span>
+              <span class="media-label">Microphone</span>
+            </label>
+            <label class="media-option"><input id="share-system-audio" type="checkbox"> Computer audio</label>
           </div>
           <video class="local-preview" id="local-preview" autoplay muted playsinline hidden></video>
           <button class="primary-button" id="start-share" type="button">

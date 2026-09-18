@@ -44,6 +44,13 @@ function setStatus(element, label, active = false) {
   element.lastElementChild.textContent = label;
 }
 
+function updateMediaIconStates() {
+  cameraInput.closest('.media-toggle').classList.toggle('is-on', cameraInput.checked);
+  microphoneInput.closest('.media-toggle').classList.toggle('is-on', microphoneInput.checked);
+  cameraInput.closest('.media-toggle').setAttribute('aria-label', cameraInput.checked ? 'Camera on' : 'Camera off');
+  microphoneInput.closest('.media-toggle').setAttribute('aria-label', microphoneInput.checked ? 'Microphone on' : 'Microphone muted');
+}
+
 function openChannel() {
   if (channel) channel.close();
   const room = roomInput.value.trim().toUpperCase() || createRoomCode();
@@ -307,6 +314,7 @@ cameraInput.addEventListener('change', () => {
       setStatus(senderStatus, 'Camera ready', true);
     }).catch(() => {
       cameraInput.checked = false;
+      updateMediaIconStates();
       setStatus(senderStatus, 'Camera unavailable');
     });
   } else if (!startButton.disabled) {
@@ -317,7 +325,9 @@ cameraInput.addEventListener('change', () => {
     setStatus(senderStatus, 'Ready');
   }
 });
+microphoneInput.addEventListener('change', updateMediaIconStates);
 remoteVideo.addEventListener('enterpictureinpicture', updatePictureInPictureLabel);
 remoteVideo.addEventListener('leavepictureinpicture', updatePictureInPictureLabel);
 initializeConsent();
+updateMediaIconStates();
 openChannel();
