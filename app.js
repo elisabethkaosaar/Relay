@@ -23,7 +23,9 @@ const shareDialog = document.querySelector('#share-dialog');
 const confirmShareButton = document.querySelector('#confirm-share');
 const cancelShareButton = document.querySelector('#cancel-share');
 
-let channel;
+let signalSocket;
+let signalQueue = [];
+let currentRoom;
 let senderPeer;
 let viewerPeer;
 let localStream;
@@ -44,17 +46,33 @@ function setStatus(element, label, active = false) {
   element.lastElementChild.textContent = label;
 }
 
+function updateMediaIconStates() {
+  cameraInput.closest('.media-toggle').classList.toggle('is-on', cameraInput.checked);
+  microphoneInput.closest('.media-toggle').classList.toggle('is-on', microphoneInput.checked);
+  cameraInput.closest('.media-toggle').setAttribute('aria-label', cameraInput.checked ? 'Camera on' : 'Camera off');
+  microphoneInput.closest('.media-toggle').setAttribute('aria-label', microphoneInput.checked ? 'Microphone on' : 'Microphone muted');
+}
+
 function openChannel() {
-  if (channel) channel.close();
+  signalSocket?.close();
   const room = roomInput.value.trim().toUpperCase() || createRoomCode();
   roomInput.value = room;
-  channel = new BroadcastChannel(`relay-room-${room}`);
-  channel.onmessage = ({ data }) => handleSignal(data);
+  currentRoom = room;
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  signalSocket = new WebSocket(`${protocol}//${location.host}`);
+  signalSocket.onopen = () => {
+    signalSocket.send(JSON.stringify({ type: 'join', room, clientId }));
+    for (const message of signalQueue) signalSocket.send(JSON.stringify(message));
+    signalQueue = [];
+  };
+  signalSocket.onmessage = ({ data }) => handleSignal(JSON.parse(data));
+  signalSocket.onclose = () => { if (currentRoom === room) setStatus(viewerStatus, 'Offline'); };
 }
 
 function sendSignal(data) {
-  if (!channel) openChannel();
-  channel.postMessage({ ...data, from: clientId });
+  const message = { ...data, from: clientId };
+  if (signalSocket?.readyState === WebSocket.OPEN) signalSocket.send(JSON.stringify(message));
+  else signalQueue.push(message);
 }
 
 function createPeer(iceHandler, trackHandler) {
@@ -307,6 +325,7 @@ cameraInput.addEventListener('change', () => {
       setStatus(senderStatus, 'Camera ready', true);
     }).catch(() => {
       cameraInput.checked = false;
+      updateMediaIconStates();
       setStatus(senderStatus, 'Camera unavailable');
     });
   } else if (!startButton.disabled) {
@@ -317,7 +336,9 @@ cameraInput.addEventListener('change', () => {
     setStatus(senderStatus, 'Ready');
   }
 });
+microphoneInput.addEventListener('change', updateMediaIconStates);
 remoteVideo.addEventListener('enterpictureinpicture', updatePictureInPictureLabel);
 remoteVideo.addEventListener('leavepictureinpicture', updatePictureInPictureLabel);
 initializeConsent();
+updateMediaIconStates();
 openChannel();
