@@ -7,6 +7,7 @@ const disconnectButton = document.querySelector('#disconnect-viewer');
 const remoteVideo = document.querySelector('#remote-video');
 const emptyStage = document.querySelector('#empty-stage');
 const stageCaption = document.querySelector('#stage-caption');
+const captureHelp = document.querySelector('#capture-help');
 const streamStats = document.querySelector('#stream-stats');
 const liveIndicator = document.querySelector('#live-indicator');
 const senderStatus = document.querySelector('#sender-status');
@@ -33,6 +34,7 @@ let remoteStream;
 let pendingSenderCandidates = [];
 let pendingViewerCandidates = [];
 const clientId = crypto.randomUUID();
+const isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
 function createRoomCode() {
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -51,6 +53,19 @@ function updateMediaIconStates() {
   microphoneInput.closest('.media-toggle').classList.toggle('is-on', microphoneInput.checked);
   cameraInput.closest('.media-toggle').setAttribute('aria-label', cameraInput.checked ? 'Camera on' : 'Camera off');
   microphoneInput.closest('.media-toggle').setAttribute('aria-label', microphoneInput.checked ? 'Microphone on' : 'Microphone muted');
+}
+
+function updateCaptureCapabilities() {
+  const screenSupported = Boolean(navigator.mediaDevices?.getDisplayMedia);
+  if (isMobileDevice && !screenSupported) {
+    cameraInput.checked = true;
+    cameraInput.disabled = true;
+    systemAudioInput.disabled = true;
+    captureHelp.textContent = 'This phone browser cannot share its screen. Camera sharing is enabled instead; microphone remains available.';
+  } else {
+    captureHelp.textContent = 'Choose a screen or camera to share. You can add computer audio and your microphone.';
+  }
+  updateMediaIconStates();
 }
 
 function openChannel() {
@@ -98,6 +113,7 @@ function createPeer(iceHandler, trackHandler) {
     stageCaption.textContent = 'Your peer is sharing';
     liveIndicator.classList.add('active');
     streamStats.textContent = 'LIVE';
+    remoteVideo.controls = isMobileDevice;
   };
   return peer;
 }
@@ -187,8 +203,13 @@ async function startSharing() {
         const microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         microphoneStream.getAudioTracks().forEach(track => cameraStream.addTrack(track));
       }
-    } else {
+    } else if (navigator.mediaDevices.getDisplayMedia) {
       displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: systemAudioInput.checked });
+    } else {
+      cameraInput.checked = true;
+      updateMediaIconStates();
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: microphoneInput.checked });
+      captureHelp.textContent = 'Screen sharing is unavailable in this phone browser, so your camera is being shared instead.';
     }
     const tracks = [...(cameraStream || displayStream).getTracks()];
     if (!cameraInput.checked && microphoneInput.checked) {
@@ -251,6 +272,7 @@ function resetRemoteView() {
   viewerPeer?.close();
   viewerPeer = null;
   remoteVideo.srcObject = null;
+  remoteVideo.controls = false;
   remoteStream = null;
   if (document.pictureInPictureElement === remoteVideo) document.exitPictureInPicture().catch(() => {});
   pipButton.disabled = true;
@@ -348,4 +370,5 @@ remoteVideo.addEventListener('enterpictureinpicture', updatePictureInPictureLabe
 remoteVideo.addEventListener('leavepictureinpicture', updatePictureInPictureLabel);
 initializeConsent();
 updateMediaIconStates();
+updateCaptureCapabilities();
 openChannel();
