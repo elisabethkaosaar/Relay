@@ -25,6 +25,7 @@ const confirmShareButton = document.querySelector('#confirm-share');
 const cancelShareButton = document.querySelector('#cancel-share');
 
 let signalSocket;
+let localChannel;
 let signalQueue = [];
 let currentRoom;
 let senderPeer;
@@ -70,6 +71,7 @@ function updateCaptureCapabilities() {
 
 function openChannel() {
   signalSocket?.close();
+  localChannel?.close();
   const room = roomInput.value.trim().toUpperCase() || createRoomCode();
   roomInput.value = room;
   currentRoom = room;
@@ -81,12 +83,22 @@ function openChannel() {
     signalQueue = [];
   };
   signalSocket.onmessage = ({ data }) => handleSignal(JSON.parse(data));
-  signalSocket.onclose = () => { if (currentRoom === room) setStatus(viewerStatus, 'Offline'); };
+  signalSocket.onerror = () => activateLocalChannel(room);
+  signalSocket.onclose = () => { if (currentRoom === room && !localChannel) activateLocalChannel(room); };
+}
+
+function activateLocalChannel(room) {
+  if (currentRoom !== room || localChannel) return;
+  signalQueue = [];
+  localChannel = new BroadcastChannel(`relay-room-${room}`);
+  localChannel.onmessage = ({ data }) => handleSignal(data);
+  setStatus(viewerStatus, 'Local tabs', true);
 }
 
 function sendSignal(data) {
   const message = { ...data, from: clientId };
   if (signalSocket?.readyState === WebSocket.OPEN) signalSocket.send(JSON.stringify(message));
+  else if (localChannel) localChannel.postMessage(message);
   else signalQueue.push(message);
 }
 

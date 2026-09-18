@@ -30,7 +30,7 @@ The Node server includes the WebSocket signaling relay. Open the server's HTTPS 
 
 Deploy `server.js` to an HTTPS Node host, then open the resulting `https://...` URL on both the computer and phone. Use the same room code on both devices. The WebSocket relay uses the page host automatically, so no separate signaling URL is needed.
 
-A plain LAN address such as `http://192.168.1.20:5173` may load the page, but mobile browsers will block camera, microphone, and screen permissions. Use HTTPS for real device testing.
+A plain LAN address such as `http://192.168.1.20:5173` may load the page, but mobile browsers will block camera, microphone, and screen permissions. Use HTTPS for real device testing. If the WebSocket relay is unavailable, the app falls back to same-browser tabs through `BroadcastChannel` and labels the connection `Local tabs`.
 
 On mobile browsers that do not expose screen capture, Relay automatically falls back to camera sharing. Camera and microphone sharing are supported through the phone's media permissions; mobile screen sharing depends on the browser and operating system.
 
