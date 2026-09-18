@@ -30,6 +30,7 @@ let localStream;
 let remoteStream;
 let pendingSenderCandidates = [];
 let pendingViewerCandidates = [];
+let presenceTimer;
 const clientId = crypto.randomUUID();
 
 function createRoomCode() {
@@ -107,8 +108,9 @@ function updatePictureInPictureLabel() {
 
 async function handleSignal(message) {
   if (message.from === clientId) return;
-  if (message.type === 'hello' && message.role === 'viewer' && localStream && !senderPeer) {
-    await startSenderPeer();
+  if (message.type === 'hello' && message.role === 'viewer' && localStream) {
+    if (!senderPeer) await startSenderPeer();
+    else if (senderPeer.connectionState !== 'connected' && senderPeer.signalingState === 'stable') await negotiatePeer(senderPeer, 'sender');
   }
   if (message.type === 'hello' && message.role === 'sender' && !senderPeer && !disconnectButton.disabled) {
     sendSignal({ type: 'hello', role: 'viewer' });
@@ -233,6 +235,8 @@ function connectViewer() {
   disconnectButton.disabled = false;
   setStatus(viewerStatus, 'Connecting', true);
   sendSignal({ type: 'hello', role: 'viewer' });
+  clearInterval(presenceTimer);
+  presenceTimer = setInterval(() => sendSignal({ type: 'hello', role: 'viewer' }), 1500);
 }
 
 function resetRemoteView() {
@@ -257,6 +261,8 @@ function resetAll(notify = true) {
   senderPeer = null;
   viewerPeer = null;
   localStream = null;
+  clearInterval(presenceTimer);
+  presenceTimer = null;
   localPreview.srcObject = null;
   localPreview.hidden = true;
   remoteStream = null;
