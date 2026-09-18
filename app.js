@@ -177,6 +177,7 @@ async function startSharing() {
   let displayStream;
   let cameraStream;
   try {
+    if (!isSecureContext || !navigator.mediaDevices) throw new DOMException('Camera and screen sharing require HTTPS.', 'SecurityError');
     if (cameraInput.checked) {
       cameraStream = localStream?.getVideoTracks().length ? localStream : await navigator.mediaDevices.getUserMedia({
         video: true,
@@ -220,7 +221,7 @@ async function startSharing() {
       localPreview.srcObject = null;
       localPreview.hidden = true;
     }
-    setStatus(senderStatus, error.name === 'NotAllowedError' ? 'Cancelled' : 'Unavailable');
+    setStatus(senderStatus, error.name === 'NotAllowedError' ? 'Cancelled' : error.name === 'SecurityError' ? 'HTTPS required' : 'Unavailable');
   }
 }
 
@@ -314,6 +315,12 @@ disconnectButton.addEventListener('click', () => resetAll(true));
 pipButton.addEventListener('click', () => togglePictureInPicture().catch(() => {}));
 cameraInput.addEventListener('change', () => {
   if (cameraInput.checked) {
+    if (!isSecureContext || !navigator.mediaDevices) {
+      cameraInput.checked = false;
+      updateMediaIconStates();
+      setStatus(senderStatus, 'HTTPS required');
+      return;
+    }
     navigator.mediaDevices.getUserMedia({ video: true, audio: false }).then(stream => {
       if (!cameraInput.checked || startButton.disabled) {
         stream.getTracks().forEach(track => track.stop());

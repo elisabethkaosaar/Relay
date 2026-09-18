@@ -26,6 +26,12 @@ npm start
 
 The Node server includes the WebSocket signaling relay. Open the server's HTTPS URL on both devices, use the same room code, connect both peers, then choose Camera or start a screen share. Camera and screen permissions require HTTPS on non-localhost devices.
 
+### Phone and computer
+
+Deploy `server.js` to an HTTPS Node host, then open the resulting `https://...` URL on both the computer and phone. Use the same room code on both devices. The WebSocket relay uses the page host automatically, so no separate signaling URL is needed.
+
+A plain LAN address such as `http://192.168.1.20:5173` may load the page, but mobile browsers will block camera, microphone, and screen permissions. Use HTTPS for real device testing.
+
 ## Repository layout
 
 - `index.html` - application markup
